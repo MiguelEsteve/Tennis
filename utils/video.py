@@ -122,7 +122,7 @@ def video_to_frames(video_path, frames_dir, overwrite=False, every=1, chunk_size
 
     if total < 1:  # if video has no frames, might be and opencv error
         print("Video has no frames. Check your OpenCV + ffmpeg installation, can't read videos!!!\n"
-              "You may need to install OpenCV by source not pip")
+            "You may need to install OpenCV by source not pip")
         return None  # return None
 
     frame_chunks = [[i, i+chunk_size] for i in range(0, total, chunk_size)]  # split the frames into chunk lists
@@ -139,7 +139,7 @@ def video_to_frames(video_path, frames_dir, overwrite=False, every=1, chunk_size
     with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
 
         futures = [executor.submit(extract_frames, video_path, frames_dir, overwrite, f[0], f[1], every)
-                   for f in frame_chunks]  # submit the processes: extract_frames(...)
+                for f in frame_chunks]  # submit the processes: extract_frames(...)
 
         for i, f in enumerate(as_completed(futures)):  # as each process completes
             print_progress(i, len(frame_chunks)-1, prefix=prefix_str, suffix='Complete')  # print it's progress

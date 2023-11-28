@@ -34,7 +34,7 @@ flags.DEFINE_string('backbone', 'resnet18_v2',
 flags.DEFINE_string('backbone_from_id',  None,
                     'Load a backbone model from a model_id, used for Temporal Pooling with fine-tuned CNN')
 flags.DEFINE_bool('freeze_backbone', False,
-                  'Freeze the backbone model')
+                'Freeze the backbone model')
 flags.DEFINE_string('model_id', '0000',
                     'model identification string')
 flags.DEFINE_string('split_id', '02',
@@ -133,7 +133,7 @@ def main(_argv):
             transforms.RandomResizedCrop(FLAGS.data_shape),
             transforms.RandomFlipLeftRight(),
             transforms.RandomColorJitter(brightness=jitter_param, contrast=jitter_param,
-                                         saturation=jitter_param),
+                                        saturation=jitter_param),
             transforms.RandomLighting(lighting_param),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])

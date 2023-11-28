@@ -4,6 +4,7 @@ import mxnet as mx
 import numpy as np
 import os
 from scipy.misc import imresize
+from PIL import Image
 from tqdm import tqdm
 
 from models.vision.flownet.model import get_flownet

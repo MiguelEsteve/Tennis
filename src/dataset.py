@@ -10,21 +10,41 @@ import gluonnlp
 
 from tqdm import tqdm
 
+from torch.utils.data import Dataset
+
 from utils.video import video_to_frames
+from configs.log_conf import getLogger
+from configs.configs import DATASETS_PATH
 
+LOGGER = getLogger(__name__)
 
-class TennisSet:
-    def __init__(self, root='data', captions=False, transform=None, split='train', every=1, balance=True, padding=1,
-                stride=1, window=1, model_id='0000', split_id='02', flow=False, max_cap_len=-1, vocab=None,
-                inference=False, feats_model=None, save_feats=False):
+class TennisSet():
+    def __init__(self, 
+                root=DATASETS_PATH, 
+                captions=False, 
+                transform=None, 
+                split='train', 
+                every=1, 
+                balance=True, 
+                padding=1,
+                stride=1, 
+                window=1, 
+                model_id='0000', 
+                split_id='02', 
+                flow=False, 
+                max_cap_len=-1, 
+                vocab=None,
+                inference=False, 
+                feats_model=None, 
+                save_feats=False):
         self._root = root
         self._captions = captions
         self._split = split
         self._balance = balance
-        self._every = every  # only get every nth frame from a video
-        self._padding = padding  # temporal padding around event boundaries
-        self._stride = stride  # temporal stride for frame sampling
-        self._window = window  # input frame volume size =1:frames >1:clip, sample not frame based
+        self._every = every         # only get every nth frame from a video
+        self._padding = padding     # temporal padding around event boundaries
+        self._stride = stride       # temporal stride for frame sampling
+        self._window = window       # input frame volume size =1:frames >1:clip, sample not frame based
         self._transform = transform
         self._flow = flow
         self._inference = inference
@@ -48,6 +68,7 @@ class TennisSet:
 
         self._samples, self._videos, self._events, self._points = self.load_data(split_id=split_id)
 
+        
         self._video_lengths = self._get_video_lengths()
 
         if self._captions:
@@ -257,6 +278,7 @@ class TennisSet:
 
         """
         names_file = os.path.join('data', 'classes.names')
+        print(names_file)
         with open(names_file, 'r') as f:
             classes = [line.strip() for line in f.readlines()]
         return classes
@@ -316,7 +338,7 @@ class TennisSet:
 
         # load the splits file
         if os.path.exists(splits_file):
-            logging.info("Loading data from {}".format(splits_file))
+            LOGGER.info("Loading data from {}".format(splits_file))
             with open(os.path.join(self._splits_dir, split_id, self._split + '.txt'), 'r') as f:
                 lines = f.readlines()
                 samples = [[line.rstrip().split()[0], int(line.rstrip().split()[1])] for line in lines]
@@ -330,6 +352,7 @@ class TennisSet:
             labels = dict()
             for video in videos:
                 labels[video] = dict()
+
 
             if self._save_feats:
                 for v in videos:
@@ -369,9 +392,10 @@ class TennisSet:
                     break
                 else:
                     for video in videos:  # lets extract frames
-                        video_to_frames(video_path=os.path.join(self._videos_dir, video + '.mp4'),  # assuming .mp4
-                                        frames_dir=self._frames_dir,
-                                        chunk_size=1000)
+                        print("passed here")
+                        # video_to_frames(video_path=os.path.join(self._videos_dir, video + '.mp4'),  # assuming .mp4
+                        #                frames_dir=self._frames_dir,
+                        #                chunk_size=1000)
 
             samples = samples_exist
 
@@ -406,15 +430,15 @@ class TennisSet:
                     if labels[video][frame] != cur_class:
                         events.append([video, start_frame, last_frame, cur_class])
                         cur_class = labels[video][frame]
-                        start_frame = frame
+                        start_frame = frame 
                     last_frame = frame
-
                 events.append([video, start_frame, last_frame, cur_class])  # add the last event
 
             # let's make up the points data
             with open(os.path.join(self._annotations_dir, 'points.txt'), 'r') as f:
                 lines = f.readlines()
             points = [l.rstrip().split() for l in lines]
+
 
             # add caps
             with open(os.path.join(self._annotations_dir, 'captions.txt'), 'r') as f:
@@ -431,7 +455,7 @@ class TennisSet:
             for point in points:
                 if point[1] in videos and int(point[2]) in in_set[point[1]]:
                     points_dict[point[0]] = point[1:]
-
+        
             return samples, videos, events, points_dict
         else:
             logging.info("Split {} does not exist, please make sure it exists to load a dataset.".format(splits_file))
